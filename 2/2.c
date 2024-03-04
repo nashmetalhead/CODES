@@ -17,7 +17,7 @@ void printArray(int *arr, int *n);
 
 // Function to insert an element at a specified position
 void insertByPosition(int *arr, int *n, int pos, int key) {
-    if (pos < 0 || pos > *n + 1) { // pos < 1 is start is 0
+    if (pos < 0 || pos > *n + 1) { // pos < 1 if start is 1
         printf("Invalid position\n");
         return;
     }
