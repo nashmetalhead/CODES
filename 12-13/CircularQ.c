@@ -1,17 +1,18 @@
-// Implementation of Circular Queue using static memory allocation.
+// Implementation of Circular Queue using dynamic memory allocation.
 #include <stdio.h>
 #include <stdlib.h>
-
-#define MAX 10
-
+#define MAX 3
 typedef struct {
     int front, rear;
-    int arr[MAX];
+    int CAP;
+    int *arr;
 } Que;
 
 void initQ(Que *q) {
     q->front = -1;
     q->rear = -1;
+    q->CAP = MAX;
+    q->arr = (int*)malloc(q->CAP * sizeof(int));
 }
 
 int isEmpty(Que* q) {
@@ -19,19 +20,37 @@ int isEmpty(Que* q) {
 }
 
 int isFull(Que* q) {
-    return ((q->rear + 1) % MAX == q->front);
+    return ((q->rear + 1) % q->CAP == q->front);
+}
+
+void resize(Que* q) {
+    int newSize = q->CAP * 2;
+    int *newArr = (int*)malloc(newSize * sizeof(int));
+    printf("Resizing...\n");
+    int i = 0;
+    int temp = q->front;
+    do {
+        newArr[i++] = q->arr[temp];
+        temp = (temp + 1) % q->CAP;
+    } while (temp != (q->rear + 1) % q->CAP);
+
+    free(q->arr);
+    q->arr = newArr;
+    q->front = 0;
+    q->rear = i - 1;
+    q->CAP = newSize; // Update the MAX size
 }
 
 void enque(Que* q, int value) {
     if (isFull(q)) {
         printf("Queue Overflow!!!\n");
-        return;
+        resize(q);
     }
     if (isEmpty(q)) {
         q->front = 0;
         q->rear = 0;
     } else {
-        q->rear = (q->rear + 1) % MAX;
+        q->rear = (q->rear + 1) % q->CAP;
     }
     q->arr[q->rear] = value;
     printf("%d inserted into the Queue\n", value);
@@ -47,7 +66,7 @@ int deque(Que* q) {
         q->front = -1;
         q->rear = -1;
     } else {
-        q->front = (q->front + 1) % MAX;
+        q->front = (q->front + 1) % q->CAP;
     }
     return data;
 }
@@ -61,8 +80,8 @@ void display(Que* q) {
     int temp = q->front;
     do {
         printf("%d ", q->arr[temp]);
-        temp = (temp + 1) % MAX;
-    } while (temp != (q->rear + 1) % MAX);
+        temp = (temp + 1) % q->CAP;
+    } while (temp != (q->rear + 1) % q->CAP);
     printf("\n");
 }
 
@@ -83,11 +102,13 @@ int main() {
                 printf("Enter the data to insert: ");
                 scanf("%d", &data);
                 enque(&q, data);
+                display(&q);
                 break;
             case 2:
                 data = deque(&q);
                 if(data != -1)
                     printf("Dequeued element is : %d\n", data);
+                display(&q);
                 break;
             case 3:
                 display(&q);
@@ -99,5 +120,6 @@ int main() {
                 printf("Invalid choice! Please enter a valid option.\n");
         }
     } while (choice != 4);
+    free(q.arr);
     return 0;
 }
